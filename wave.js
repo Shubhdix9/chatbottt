@@ -37,28 +37,42 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(tick, 500);
 
     // Submit → smooth transition
+    function submitHero() {
+        const prompt = heroInput ? heroInput.value.trim() : '';
+
+        // Fade out hero
+        heroSection.classList.add('hero--hidden');
+
+        // Fade in chat after a beat
+        setTimeout(() => {
+            chatLayer.classList.remove('chat-layer--hidden');
+
+            // Auto-submit the prompt to the chatbot
+            if (prompt) {
+                const chatInput = document.getElementById('user-input');
+                const sendBtn   = document.getElementById('send-btn');
+                if (chatInput && sendBtn) {
+                    chatInput.value = prompt;
+                    sendBtn.click();
+                }
+            }
+        }, 350);
+    }
+
     if (heroForm) {
         heroForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const prompt = heroInput.value.trim();
+            submitHero();
+        });
+    }
 
-            // Fade out hero
-            heroSection.classList.add('hero--hidden');
-
-            // Fade in chat after a beat
-            setTimeout(() => {
-                chatLayer.classList.remove('chat-layer--hidden');
-
-                // Auto-submit the prompt to the chatbot
-                if (prompt) {
-                    const chatInput = document.getElementById('user-input');
-                    const sendBtn   = document.getElementById('send-btn');
-                    if (chatInput && sendBtn) {
-                        chatInput.value = prompt;
-                        sendBtn.click();
-                    }
-                }
-            }, 350);
+    // Enter/Return key sends message from hero textarea
+    if (heroInput) {
+        heroInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                submitHero();
+            }
         });
     }
 
@@ -150,12 +164,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const gCfg = {maxGlowDist:690,speedScale:0.52,glowFalloff:0.6,mouseSmoothing:30};
     const gDyn = {decay:3.3,max:40,accumEase:1.5,speedEase:8.5};
 
-    let DPR = Math.min(window.devicePixelRatio, window.matchMedia("(max-resolution:180dpi)").matches?1.5:2)*0.5;
+    let DPR = Math.min(window.devicePixelRatio, 1.5) * 0.5;
 
     const container = document.getElementById('waveCanvas');
     if (!container) return;
 
-    const renderer = new THREE.WebGLRenderer({antialias:false,alpha:true});
+    const renderer = new THREE.WebGLRenderer({antialias:false,alpha:true,powerPreference:'high-performance'});
     renderer.setPixelRatio(DPR);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1;
@@ -169,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let camW=0, camH=0, ready=false;
     let setNDC, setSpeed, setPh1, setPh2;
 
-    const MAX_BARS=256, BAR_W=14, BAR_GAP=10, EXT=320;
+    const MAX_BARS=128, BAR_W=14, BAR_GAP=10, EXT=200;
     let mesh=null, barN=0, barMat, barCX=null;
 
     function updateGlowDist() {
@@ -323,8 +337,8 @@ document.addEventListener('DOMContentLoaded', () => {
         renderer.setSize(camW,camH);
         composer=new EffectComposer(renderer);composer.setPixelRatio(DPR);
         composer.addPass(new RenderPass(scene,cam));
-        bloomPass=new UnrealBloomPass(new THREE.Vector2(camW,camH),1,0.68,0);
-        bloomPass.resolution.set(camW*0.5,camH*0.5);
+        bloomPass=new UnrealBloomPass(new THREE.Vector2(camW,camH),0.8,0.6,0);
+        bloomPass.resolution.set(Math.floor(camW*0.3),Math.floor(camH*0.3));
         composer.addPass(bloomPass);
         grain=createGrainPass();composer.addPass(grain);
         buildBars();setupPtr();updateGain();ready=true;
@@ -358,6 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let smoothV=0, rect;
+    let frameSkip=0;
     const loop=()=>{
         if(!ready||!mesh)return;
         const dt=gsap.ticker.deltaRatio()*(1/60);
@@ -376,7 +391,10 @@ document.addEventListener('DOMContentLoaded', () => {
         setNDC((proxyX/camW)*2-1);
         u.uBaseY.value=-camH*0.5+(window.innerWidth<768?20:40);
         grain.uniforms.time.value+=dt*0.2;
-        glowTick(dt);composer.render();
+        // Run glow computation every other frame for perf
+        frameSkip=(frameSkip+1)%2;
+        if(frameSkip===0) glowTick(dt*2);
+        composer.render();
     };
 
     const ro=new ResizeObserver(e=>{for(const x of e)if(x.target===container)onResize(x.contentRect.width,x.contentRect.height);});
