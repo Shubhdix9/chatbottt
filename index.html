@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vicharanashala Yaksha Bot</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+</head>
+<body>
+
+    <!-- ★ LAYER 1: Full-screen wave background (always visible) -->
+    <div id="waveCanvas"></div>
+
+    <!-- ★ LAYER 2: Blobs -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <!-- ★ LAYER 3: Hero (front-end landing) -->
+    <div id="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Build with AI.</h1>
+            <p class="hero-subtitle">The AI Fullstack Engineer. Build prototypes, apps, and websites</p>
+            <form id="hero-form" class="hero-form">
+                <div class="hero-input-box">
+                    <textarea id="hero-input" placeholder="Make me a..." rows="5"></textarea>
+                    <button type="submit" class="hero-submit-btn" aria-label="Generate">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                            <path d="M7 17L17 7"/><path d="M7 7h10v10"/>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ★ LAYER 4: Chat (backend — hidden until hero submits) -->
+    <div id="chat-layer" class="chat-layer chat-layer--hidden">
+        <!-- Centered header -->
+        <header class="chat-header-float">
+            <h1 class="chat-bot-name">Yaksha Assistant</h1>
+            <p class="chat-bot-sub">Vicharanashala Internship Support</p>
+            <p class="chat-bot-credit">By Room 62</p>
+        </header>
+
+        <!-- Messages -->
+        <main class="chat-messages" id="chat-container">
+            <div class="message bot-message">
+                <div class="message-content">
+                    Hello! I am Yaksha, your virtual assistant for the Vicharanashala Internship. I can answer questions about NOCs, Spurti Points, ViBe, Teams, and more. How can I help you today?
+                </div>
+                <span class="message-time">Just now</span>
+            </div>
+        </main>
+
+        <!-- Input -->
+        <footer class="chat-input-bar">
+            <div class="chat-input-row">
+                <button class="icon-btn"><i class="fa-solid fa-paperclip"></i></button>
+                <input type="text" id="user-input" placeholder="Type your question here..." autocomplete="off">
+                <button id="send-btn" class="send-btn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+            <div class="chat-disclaimer">Powered by Vicharanashala Lab AI</div>
+        </footer>
+    </div>
+
+    <script type="module" src="wave.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
